@@ -1,10 +1,4 @@
-const symbolGenerator = function* () {
-	while(true) {
-		yield Symbol()
-	}
-}()
-
-const [λ, x, y, n, rec, dec, inc, when, mul, eq] = symbolGenerator
+require('./symbols')
 
 const env = () => {
 	throw new Error('unbound')
@@ -51,19 +45,6 @@ const evalExpr = (expr, env) => {
 	return evalExpr(operator, env)(evalExpr(operand, env))
 }
 
-console.log(evalExpr(
-	[[[λ, [x],
-		[λ, [y],
-			[dec, y]]], 7], 5],
-env))
+const evaluate = term => evalExpr(term, env)
 
-console.log(evalExpr(
-	[[[λ, [rec],
-	      [λ, [n],
-				    [[rec, rec], n]]],
-	  [λ, [rec],
-		  [λ, [n],
-			  [when, [eq, n, 0],
-				      1,
-						  [mul, n, [[rec, rec], [dec, n]]]]]]], 6],
-env))
+module.exports = evaluate
