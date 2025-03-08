@@ -7,29 +7,18 @@ const evalExpr = (expr, env) => {
 	// symbols evaluate to their value in the environment
 	if (typeof expr === 'symbol') return env(expr)
 
-	// mathematical primitives
+	if (expr[0] === quote) return expr[1]
+	if (expr[0] === car) return evalExpr(expr[1], env)[0]
+	if (expr[0] === cdr) return evalExpr(expr[1], env).slice(1)
+	if (expr[0] === define) return evalDefine(expr, env)
+	if (expr[0] === eq) return evalExpr(expr[1], env) === evalExpr(expr[2], env)
+	if (expr[0] === add) return evalExpr(expr[1], env) + evalExpr(expr[2], env)
+	if (expr[0] === mul) return evalExpr(expr[1], env) * evalExpr(expr[2], env)
 	if (expr[0] === inc) return evalExpr(expr[1], env) + 1
 	if (expr[0] === dec) return evalExpr(expr[1], env) - 1
-
-	// definition
-	if (expr[0] === define) return evalDefine(expr, env)
-
-	// [eq a b] - equality
-	if (expr[0] === eq) return evalExpr(expr[1], env) === evalExpr(expr[2], env)
-
-	// [add a b] - addition
-	if (expr[0] === add) return evalExpr(expr[1], env) + evalExpr(expr[2], env)
-
-	// [mul a b] - multiplication
-	if (expr[0] === mul) return evalExpr(expr[1], env) * evalExpr(expr[2], env)
-
-	// [when cond cons alt] - if statement
 	if (expr[0] === when) return evalWhen(expr, env)
-
-	// [λ, [a], body]
 	if (expr[0] === λ) return evalLambda(expr, env)
 
-	// [f x]
 	return apply(expr, env)
 }
 
@@ -52,21 +41,32 @@ const evalWhen = ([_when, cond, cons, alt], env) => {
 	}
 }
 
-const evalLambda = ([_λ, [a], body], env) => {
-	return arg => evalExpr(body, b => {
-		if (a === b) return arg
-		return env(b)
-	})
+const evalLambda = ([_λ, params, body], env) => {
+	const fn = (...args) => {
+		const newEnv = b => {
+			const index = params.indexOf(b)
+			if (index !== -1) return args[index]
+			if (b === recur) return fn
+			return env(b)
+		}
+
+		return evalExpr(body, newEnv)
+	}
+
+	return fn
 }
 
 const apply = (expr, env) => {
-	const [operator, operand] = expr
-	return evalExpr(operator, env)(evalExpr(operand, env))
+	const [operator, ...operands] = expr
+	const fn = evalExpr(operator, env)
+	if (typeof fn !== 'function') throw new Error(`not a function, ${operator.toString()}`)
+	const args = operands.map(operand => evalExpr(operand, env))
+	return fn(...args)
 }
 
 
-const defaultEnv = () => {
-	throw new Error('unbound')
+const defaultEnv = a => {
+	throw new Error(`unbound, ${a.toString()}`)
 }
 
 const evaluate = term => evalExpr(term, defaultEnv)
