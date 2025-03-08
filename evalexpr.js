@@ -2,14 +2,15 @@ require('./symbols')
 
 const evalExpr = (expr, env) => {
 	// primitives evalue to themselves
-	if (['number', 'boolean'].includes(typeof expr)) return expr
+	if (['number', 'boolean', 'undefined'].includes(typeof expr)) return expr
 
 	// symbols evaluate to their value in the environment
 	if (typeof expr === 'symbol') return env(expr)
 
 	if (expr[0] === quote) return expr[1]
+	if (expr[0] === cons) return [evalExpr(expr[1], env), evalExpr(expr[2], env)]
 	if (expr[0] === car) return evalExpr(expr[1], env)[0]
-	if (expr[0] === cdr) return evalExpr(expr[1], env).slice(1)
+	if (expr[0] === cdr) return evalExpr(expr[1], env)[1]
 	if (expr[0] === define) return evalDefine(expr, env)
 	if (expr[0] === eq) return evalExpr(expr[1], env) === evalExpr(expr[2], env)
 	if (expr[0] === add) return evalExpr(expr[1], env) + evalExpr(expr[2], env)
