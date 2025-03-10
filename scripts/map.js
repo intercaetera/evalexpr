@@ -4,10 +4,10 @@ const evaluate = require('../evalexpr')
 const program = 
 	[define, [
 		[double, [λ, [a], [mul, a, 2]]],
-		[ys, [cons, 1, [cons, 2, [cons, 3, undefined]]]],
+		[ys, [quote, [1, 2, 3, 4, 5]]],
 		[map, [λ, [fn, xs],
-			[when, [eq, xs, undefined],
-				undefined,
+			[when, [isNil, xs],
+				[quote, []],
 				[cons, [fn, [car, xs]], [recur, fn, [cdr, xs]]]
 			]]]
 	], 

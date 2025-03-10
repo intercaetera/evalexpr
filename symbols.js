@@ -9,13 +9,9 @@ const symbols = [
 
 	// evaluator symbols
 	'quote',
-	'cons', 'car', 'cdr',
 	'define',
 	'recur',
-	'dec', 'inc',
 	'when',
-	'add', 'mul',
-	'eq',
 ]
 
 const createSymbol = name => {
