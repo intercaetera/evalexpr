@@ -10,7 +10,7 @@ const program =
                     1,
                     [mul, n, [recur, [dec, n]]]]]],
     ],
-    [factorial, 6]]
+        [factorial, 6]]
 
 const result = evaluate(program)
 

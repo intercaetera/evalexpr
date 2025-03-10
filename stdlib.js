@@ -7,6 +7,7 @@ const stdlib = {
 	car: ([x]) => x,
 	cdr: ([_x, ...xs]) => xs,
 	cons: (x, xs) => ([x, ...xs]),
+	list: (...xs) => xs,
 	isNil: x => Array.isArray(x) && x.length === 0,
 }
 
